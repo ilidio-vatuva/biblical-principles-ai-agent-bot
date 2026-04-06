@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(claude-api)",
+      "Skill(claude-api:*)",
+      "Bash(pip install:*)",
+      "Bash(python -c \"from dotenv import load_dotenv; print\\('ok'\\)\")"
+    ]
+  }
+}

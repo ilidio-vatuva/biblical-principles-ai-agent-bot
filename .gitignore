@@ -136,6 +136,10 @@ celerybeat.pid
 
 # Environments
 .env
+
+# App-specific secrets & runtime state
+knowledge/system_prompt.md
+state.json
 .envrc
 .venv
 env/
