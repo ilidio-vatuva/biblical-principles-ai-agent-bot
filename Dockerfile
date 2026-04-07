@@ -18,6 +18,8 @@ RUN echo "0 0 * * * cd /app && python main.py >> /app/logs/cron.log 2>&1" | cron
 # Pass runtime env vars to cron's environment
 RUN touch /etc/environment
 
-CMD printenv | grep -E "ANTHROPIC|TELEGRAM|SYSTEM_PROMPT" >> /etc/environment \
+CMD mkdir -p /app/logs \
+    && touch /app/logs/cron.log \
+    && printenv | grep -E "ANTHROPIC|TELEGRAM|SYSTEM_PROMPT" >> /etc/environment \
     && cron \
     && tail -f /app/logs/cron.log
