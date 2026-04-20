@@ -90,34 +90,6 @@ uvicorn server:app --reload
 | `POST /preview` | Generate content, return it — nothing sent to Telegram |
 | `POST /trigger` | Full run: generate + send to Telegram |
 
-## Docker
-
-### Build and run
-
-```bash
-docker build -t biblical-bot .
-
-docker run -d \
-  --name biblical-bot \
-  --env-file .env \
-  -v $(pwd)/knowledge:/app/knowledge \
-  -v $(pwd)/state.json:/app/state.json \
-  -v $(pwd)/logs:/app/logs \
-  biblical-bot
-```
-
-The two volumes are important:
-- `knowledge/` — mounts your `system_prompt.md` into the container
-- `state.json` — persists the current principle across container restarts
-
-### View logs
-
-```bash
-docker logs -f biblical-bot
-# or
-tail -f logs/cron.log
-```
-
 ## State
 
 `state.json` tracks:

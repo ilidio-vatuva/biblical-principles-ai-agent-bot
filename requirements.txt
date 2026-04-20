@@ -1,5 +1,5 @@
-anthropic
-python-dotenv
-requests
-fastapi
-uvicorn
+anthropic>=0.85,<1
+python-dotenv>=1.2,<2
+requests>=2.32,<3
+fastapi>=0.136,<1
+uvicorn>=0.44,<1

@@ -2,9 +2,7 @@ import os
 import re
 
 import requests
-from dotenv import load_dotenv
 
-load_dotenv()
 
 TELEGRAM_BOT_TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
 TELEGRAM_CHAT_ID = os.environ["TELEGRAM_CHAT_ID"]
@@ -39,8 +37,20 @@ def _post(text: str) -> None:
 def _split(text: str) -> list[str]:
     if len(text) <= MAX_MESSAGE_LENGTH:
         return [text]
-    chunks = []
-    while text:
-        chunks.append(text[:MAX_MESSAGE_LENGTH])
-        text = text[MAX_MESSAGE_LENGTH:]
+    chunks: list[str] = []
+    current = ""
+    for paragraph in text.split("\n\n"):
+        candidate = f"{current}\n\n{paragraph}" if current else paragraph
+        if len(candidate) <= MAX_MESSAGE_LENGTH:
+            current = candidate
+        else:
+            if current:
+                chunks.append(current)
+            # Handle single paragraph longer than limit
+            while len(paragraph) > MAX_MESSAGE_LENGTH:
+                chunks.append(paragraph[:MAX_MESSAGE_LENGTH])
+                paragraph = paragraph[MAX_MESSAGE_LENGTH:]
+            current = paragraph
+    if current:
+        chunks.append(current)
     return chunks

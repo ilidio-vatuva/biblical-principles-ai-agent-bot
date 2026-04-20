@@ -7,10 +7,16 @@ Endpoints:
   POST /trigger      → run the full cron logic (generates + sends)
 """
 
+import os
 from typing import Optional
 
 import uvicorn
-from fastapi import FastAPI, HTTPException
+from dotenv import load_dotenv
+
+load_dotenv()
+
+from fastapi import Depends, FastAPI, HTTPException
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel
 
 from agent import generate_daily_content
@@ -19,6 +25,14 @@ from main import main as run_cron
 from repository import current_day_number, load_state
 
 app = FastAPI(title="Biblical Principles Bot — Test Server")
+
+_security = HTTPBearer()
+_API_KEY = os.environ.get("API_KEY", "")
+
+
+def _require_auth(creds: HTTPAuthorizationCredentials = Depends(_security)) -> None:
+    if not _API_KEY or creds.credentials != _API_KEY:
+        raise HTTPException(status_code=401, detail="Invalid or missing API key")
 
 
 # ── Models ────────────────────────────────────────────────────────────────────
@@ -44,7 +58,7 @@ def get_state():
     return state
 
 
-@app.post("/preview", response_model=PreviewResponse)
+@app.post("/preview", response_model=PreviewResponse, dependencies=[Depends(_require_auth)])
 def preview(req: PreviewRequest):
     """
     Generate content for the given principle/day and return it.
@@ -63,7 +77,7 @@ def preview(req: PreviewRequest):
     return PreviewResponse(principle=principle, day=day, content=content)
 
 
-@app.post("/trigger")
+@app.post("/trigger", dependencies=[Depends(_require_auth)])
 def trigger():
     """
     Run the full cron logic: generate content and send it to Telegram.

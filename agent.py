@@ -11,9 +11,9 @@ def _load_system_prompt() -> str:
     if(os.path.exists(os.path.join(KNOWLEDGE_DIR, "system_prompt.md"))):
         with open(os.path.join(KNOWLEDGE_DIR, "system_prompt.md")) as f:
             return f.read()
-    propmpt_url = os.environ.get("SYSTEM_PROMPT_URL")
-    if propmpt_url:
-        response = requests.get(propmpt_url)
+    prompt_url = os.environ.get("SYSTEM_PROMPT_URL")
+    if prompt_url:
+        response = requests.get(prompt_url, timeout=15)
         response.raise_for_status()
         return response.text
     raise RuntimeError("No system prompt found: neither knowledge/system_prompt.md nor SYSTEM_PROMPT_URL env var is available.")
@@ -43,12 +43,11 @@ def generate_daily_content(principle_number: int, day_number: int) -> str:
             "para o encontro e a pergunta de alinhamento profunda."
         )
 
-    with client.messages.stream(
-        model="claude-sonnet-4-20250514",
+    message = client.messages.create(
+        model=os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-6"),
         max_tokens=512,
         system=system_prompt,
         messages=[{"role": "user", "content": user_message}],
-    ) as stream:
-        final = stream.get_final_message()
+    )
 
-    return next(block.text for block in final.content if block.type == "text")
+    return next(block.text for block in message.content if block.type == "text")

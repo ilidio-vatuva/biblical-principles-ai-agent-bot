@@ -1,4 +1,9 @@
+import logging
 from datetime import date
+
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from agent import generate_daily_content
 from bot import send_message
@@ -10,13 +15,19 @@ from repository import (
     this_weeks_monday,
 )
 
+logging.basicConfig(
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    level=logging.INFO,
+)
+logger = logging.getLogger(__name__)
+
 
 def main() -> None:
     day = current_day_number()
 
     # Sunday — rest day, no message
     if day == 7:
-        print("Sunday — no message scheduled.")
+        logger.info("Sunday — no message scheduled.")
         return
 
     state = load_state()
@@ -32,12 +43,16 @@ def main() -> None:
         save_state(state)
 
     principle = state["current_principle"]
-    print(f"[{date.today()}] Principle {principle} — Day {day}/{'5' if day <= 5 else 'Sábado'}")
+    logger.info("Principle %d — Day %s", principle, day if day <= 5 else "Sábado")
 
-    content = generate_daily_content(principle, day)
-    send_message(content)
+    try:
+        content = generate_daily_content(principle, day)
+        send_message(content)
+    except Exception:
+        logger.exception("Failed to generate or send message")
+        raise
 
-    print("Message sent.")
+    logger.info("Message sent.")
 
 
 if __name__ == "__main__":

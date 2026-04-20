@@ -14,7 +14,10 @@ def load_state() -> dict:
     if not os.path.exists(STATE_FILE):
         return DEFAULT_STATE.copy()
     with open(STATE_FILE) as f:
-        return json.load(f)
+        data = json.load(f)
+    if "current_principle" not in data or not isinstance(data["current_principle"], int):
+        raise ValueError(f"Invalid state.json: missing or bad 'current_principle'")
+    return data
 
 
 def save_state(state: dict) -> None:
