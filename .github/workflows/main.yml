@@ -22,7 +22,7 @@ jobs:
           script: |
             set -e
 
-            APP_DIR=~/biblical-principles-ai-agent-bot
+            APP_DIR=~/apps/biblical-principles-ai-agent-bot
 
             # Clone or pull latest code
             if [ -d "$APP_DIR" ]; then
@@ -34,7 +34,9 @@ jobs:
               cd "$APP_DIR"
             fi
 
-            # Install Python dependencies
+            # Set up virtual environment and install dependencies
+            python3 -m venv "$APP_DIR/venv"
+            source "$APP_DIR/venv/bin/activate"
             pip install -r requirements.txt
 
             # Write .env file
@@ -53,8 +55,8 @@ jobs:
             pm2 delete biblical-bot-cron || true
             pm2 delete biblical-bot-server || true
 
-            pm2 start main.py --name biblical-bot-cron --interpreter python3 --no-autorestart --cron-restart="0 0 * * *"
-            pm2 start server.py --name biblical-bot-server --interpreter python3
+            pm2 start main.py --name biblical-bot-cron --interpreter "$APP_DIR/venv/bin/python" --no-autorestart --cron-restart="0 0 * * *"
+            pm2 start server.py --name biblical-bot-server --interpreter "$APP_DIR/venv/bin/python"
 
             pm2 save
 
