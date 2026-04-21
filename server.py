@@ -22,7 +22,7 @@ from pydantic import BaseModel
 from agent import generate_daily_content
 from bot import send_message
 from main import main as run_cron
-from repository import current_day_number, load_state
+from repository import current_day_number, load_history, load_state
 
 app = FastAPI(title="Biblical Principles Bot — Test Server")
 
@@ -73,7 +73,8 @@ def preview(req: PreviewRequest):
     if principle < 1:
         raise HTTPException(status_code=400, detail="principle must be >= 1")
 
-    content = generate_daily_content(principle, day)
+    history = load_history(principle)
+    content = generate_daily_content(principle, day, history)
     return PreviewResponse(principle=principle, day=day, content=content)
 
 

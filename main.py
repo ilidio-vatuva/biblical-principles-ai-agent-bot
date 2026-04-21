@@ -10,7 +10,9 @@ from bot import send_message
 from repository import (
     advance_principle,
     current_day_number,
+    load_history,
     load_state,
+    save_day_content,
     save_state,
     this_weeks_monday,
 )
@@ -46,7 +48,9 @@ def main() -> None:
     logger.info("Principle %d — Day %s", principle, day if day <= 5 else "Sábado")
 
     try:
-        content = generate_daily_content(principle, day)
+        history = load_history(principle)
+        content = generate_daily_content(principle, day, history)
+        save_day_content(principle, day, content)
         send_message(content)
     except Exception:
         logger.exception("Failed to generate or send message")
