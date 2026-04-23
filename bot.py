@@ -18,6 +18,22 @@ def send_message(text: str) -> None:
 
 
 def _to_html(text: str) -> str:
+    lines = text.split("\n")
+    result = []
+    for line in lines:
+        # Headings → bold
+        line = re.sub(r"^#{1,3}\s+(.+)$", r"<b>\1</b>", line)
+        # Horizontal rules → blank line
+        if re.match(r"^-{3,}$", line.strip()):
+            result.append("")
+            continue
+        # Blockquotes
+        line = re.sub(r"^>\s?(.*)$", r"<blockquote>\1</blockquote>", line)
+        result.append(line)
+    text = "\n".join(result)
+    # Merge consecutive blockquotes
+    text = re.sub(r"</blockquote>\n<blockquote>", "\n", text)
+    # Bold and italic (inline)
     text = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", text)
     text = re.sub(r"\*(.+?)\*", r"<i>\1</i>", text)
     return text
