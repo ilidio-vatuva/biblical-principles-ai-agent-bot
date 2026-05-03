@@ -11,6 +11,7 @@ from repository import (
     advance_principle,
     current_day_number,
     load_history,
+    load_prior_principles_summary,
     load_state,
     save_day_content,
     save_state,
@@ -49,7 +50,8 @@ def main() -> None:
 
     try:
         history = load_history(principle)
-        content = generate_daily_content(principle, day, history)
+        prior_principles = load_prior_principles_summary(principle)
+        content = generate_daily_content(principle, day, history, prior_principles)
         save_day_content(principle, day, content)
         send_message(content)
     except Exception:

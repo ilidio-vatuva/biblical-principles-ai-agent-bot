@@ -66,3 +66,27 @@ def save_day_content(principle: int, day: int, content: str) -> None:
     history.sort(key=lambda h: h["day"])
     with open(_history_path(principle), "w") as f:
         json.dump(history, f, indent=2, ensure_ascii=False)
+
+
+def load_prior_principles_summary(current_principle: int, snippet_chars: int = 400) -> list[dict]:
+    """Return a compact summary of all previously covered principles (< current_principle).
+
+    Reads the Day 1 content of each prior principle (which contains the principle name,
+    key phrase and anchor verse) and trims it to a short snippet so it can be cheaply
+    injected as context to prevent the agent from repeating themes across weeks.
+    """
+    if not os.path.isdir(HISTORY_DIR):
+        return []
+
+    summaries: list[dict] = []
+    for p in range(1, current_principle):
+        history = load_history(p)
+        if not history:
+            continue
+        # Prefer day 1 (intro), fallback to the earliest available day.
+        day1 = next((h for h in history if h["day"] == 1), history[0])
+        snippet = day1["content"].strip()
+        if len(snippet) > snippet_chars:
+            snippet = snippet[:snippet_chars].rstrip() + "..."
+        summaries.append({"principle": p, "snippet": snippet})
+    return summaries
